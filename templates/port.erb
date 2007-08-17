@@ -1,0 +1,28 @@
+<%=
+    require 'yaml'
+    # We cache the latest port number in this file in the state dir
+    # on the server.
+    portmap = File.join(Puppet[:statedir], "mongrel_ports.txt")
+
+    if FileTest.exists?(portmap)
+        map = YAML.load(File.read(portmap))
+    else
+        map = {}
+    end
+
+    # Cache the per-host port values.
+    unless port = map[fqdn]
+        nextfile = File.join(Puppet[:statedir], "next_mongrel_port.txt")
+        if FileTest.exists?(nextfile)
+            port = Integer(File.read(nextfile))
+        else
+            port = Integer(port_start)
+        end
+        Puppet.info "Choosing mongrel port start %s for %s" % [port, fqdn]
+        map[fqdn] = port
+        File.open(portmap, "w") { |f| f.print YAML.dump(map) }
+        File.open(nextfile, "w") { |f| f.print((port + Integer(port_increment)).to_s) }
+    end
+
+    port
+-%>

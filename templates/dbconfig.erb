@@ -1,0 +1,14 @@
+<% raise(ArgumentError, "Unsupported database type %s" % dbtype) unless ["postgresql"].include?(dbtype) %>
+<% environments.each do |env| %>
+<%= env %>:
+  adapter: <%= dbtype %>
+  database: <%= name %>_<%= env %>
+<% if dbuser %>
+  username: <%= dbuser %>
+  password: <%= dbpassword %>
+<% end %>
+<% if dbserver %>
+  host: <%= dbserver %>
+<% end %>
+
+<% end %>
